@@ -49,4 +49,9 @@
 modules.order
 Module.symvers
 Mkfile.old
-dkms.conf
+
+nbproject/
+.vscode/
+Makefile
+*.pdf
+Python/env/
