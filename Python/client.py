@@ -1,8 +1,11 @@
 import socket
 from datetime import datetime
+#from prettytable import PrettyTable
+import threading
+import queue
 
-def menu(client):
-    client.sendall(b'send')
+def menu():
+    #client.sendall(b'send')
     option = int(input("[1]Enviar mensaje\n[2]Cambiar frecuencia\n[3]Desconectar\n"))
     return option
 
@@ -19,9 +22,8 @@ PORT = 7000
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE="!DISCONNECT"
 SERVER="192.168.43.218"
-
 ADDR= (SERVER, PORT)
-
+queue_client = queue.Queue()
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 status = client.connect(ADDR)
@@ -29,19 +31,6 @@ print(f"Status: {status}")
 
 print("[STARTING] client is started")
 initial_time = datetime.now()
+thr1 = threading.Thread(target=menu)
 while True:
-    option = menu()
-    if option == 1:
-        msg = input("Mensaje: ")
-        client.sendall(msg.encode())
-        while ACK != 'ACK':
-            ACK = client.recv(HEADER).decode()
-        print("Server ACK")
-            
-    elif option == 3:
-        client.sendall(b'DISCONNECT')
-        client.close()
-        break
-    else:
-        
-
+    client.sendall(b"REQ")

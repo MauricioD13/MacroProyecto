@@ -1,8 +1,14 @@
 import socket
 import threading #Usar varios hilos en un mismo programa, para que el servidor pueda atender varios pedidos
+import queue
 
-
-HEADER = 64 # Tamaño del primer mensaje que se recibirá
+queue_menu = queue.Queue()
+HEADER = 64
+def menu():
+    while True:
+        option = int(input("[1]Enviar mensaje\n[2]Cambiar frecuencia\n[3]Desconectar\n"))
+        queue_menu.put(option)
+        
 PORT = 7000
 SERVER= socket.gethostbyname(socket.gethostname()) #gethostname devuelve el nombre del pc en que se esta corriendo el script
 #gethostbyname sabiendo cual es el nombre de la maquina esta funcion devuelve la direccion de IP del pc
@@ -20,17 +26,18 @@ ADDR =(SERVER,PORT) #Debe ser una tupla para usar el socket
 server.bind(ADDR)# Se une el socket a la direccion del pc
 
 def handle_client(conn,addr): # Esta funcion estar en paralelo 
-    print(f"[NEW CONNECTION] {addr} connected.\n")
     connected=True
+    print(f"[NEW CONNECTION] {addr} connected.\n")
     while connected:
-        msg = conn.recv(HEADER).decode(FORMAT) #Blocking code
-        #Parametro: tamaño del mensaje
-        #El primer mensaje que será recibido contendra informacion sobre el tamaño de los siguientes mensajes
-        if msg:
-            print(f"[ADDRESS: {addr}]\n MESSAGE: {msg}")
-        conn.sendall(b'Hello we are connected:1')
-        value = int(input("Valor: "))
-        conn.sendall(bytes([value]))
+        
+        msg = conn.recv(1024)
+        if msg.decode() == 'REQ':
+            if(queue_menu.empty() == False):
+                command = queue_menu.get()
+                command = 'COMM:'+str(command)
+                conn.sendall(command.encode())
+            else:
+                conn.sendall(b'ACK')
     conn.close()    
         
         
@@ -42,11 +49,9 @@ def start(): #Nuevas conexiones
     while True:
         conn, addr=server.accept() 
         #El metodo accept() devuelve la direccion donde esta el socket del cliente y tambien el objeto, i.e, el socket
-        handle_client(conn, addr)
-        #thread= threading.Thread(target=handle_client, args=(conn,addr))
-        #Primer parametro es la funcion a la que quiero llamar
-        #Segundo parametro son los argumentos que se le pasan a la funcion que se esta llamando
-        #thread.start()
+        thr1 = threading.Thread(target = menu)
+        thr1.start()
+        handle_client(conn,addr)
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount() -1}")  # Cantidad de procesos con vida 
         
     
