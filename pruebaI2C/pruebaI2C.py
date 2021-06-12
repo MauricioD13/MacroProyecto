@@ -42,7 +42,7 @@ def init_rtc(i2c):
 
 if __name__ == '__main__':
 
-    i2c = I2C(scl=Pin(22),sda=Pin(21), freq=100000)
+    i2c = I2C(scl=Pin(22),sda=Pin(21), freq=400000)
    
     while True:
         option = int(input('Opcion: '))
