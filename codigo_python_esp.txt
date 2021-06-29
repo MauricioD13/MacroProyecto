@@ -83,6 +83,7 @@ class ESP_I2C:
                     mem_address = search_date(RTC.day,int(aux_msg[1]))
                     msg = readfrom_mem(MEM.address_slave,mem_address,288)
                     self.socket.sendall(msg)
+                    
                 elif aux_msg[0] == 'COMM2':
                     self.send_time = int(aux_msg[1])
                 elif aux_msg[0] == 'COMM3':
@@ -145,4 +146,3 @@ if __name__ == '__main__':
     esp_i2c.connected = connected
     timer = Timer(1)
     timer.init(period = esp_i2c.scan_time, mode = Timer.PERIODIC, callback = esp_i2c.handler_I2C)
-    
